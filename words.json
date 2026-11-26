@@ -1,0 +1,138 @@
+[
+  {
+    "word": "hello",
+    "audio": "audio/hello.mp3",
+    "examples": [
+      {
+        "sentence": "Hello, how are you?",
+        "translation": "سلام، حالت چطور است؟"
+      },
+      {
+        "sentence": "I say hello to my teacher.",
+        "translation": "من به معلمم سلام می‌کنم."
+      }
+    ]
+  },
+  {
+    "word": "beautiful",
+    "audio": "audio/beautiful.mp3",
+    "examples": [
+      {
+        "sentence": "This is a beautiful day.",
+        "translation": "امروز روز زیبایی است."
+      },
+      {
+        "sentence": "Your city is beautiful.",
+        "translation": "شهر تو زیباست."
+      }
+    ]
+  },
+  {
+    "word": "important",
+    "audio": "audio/important.mp3",
+    "examples": [
+      {
+        "sentence": "English is important for my work.",
+        "translation": "انگلیسی برای کار من مهم است."
+      },
+      {
+        "sentence": "This is an important question.",
+        "translation": "این یک سؤال مهم است."
+      }
+    ]
+  },
+  {
+    "word": "understand",
+    "audio": "audio/understand.mp3",
+    "examples": [
+      {
+        "sentence": "I understand the lesson.",
+        "translation": "من درس را می‌فهمم."
+      },
+      {
+        "sentence": "Do you understand me?",
+        "translation": "آیا حرفم را می‌فهمی؟"
+      }
+    ]
+  },
+  {
+    "word": "friend",
+    "audio": "audio/friend.mp3",
+    "examples": [
+      {
+        "sentence": "My friend lives near me.",
+        "translation": "دوستم نزدیک من زندگی می‌کند."
+      },
+      {
+        "sentence": "She is my best friend.",
+        "translation": "او بهترین دوست من است."
+      }
+    ]
+  },
+  {
+    "word": "water",
+    "audio": "audio/water.mp3",
+    "examples": [
+      {
+        "sentence": "I drink water every morning.",
+        "translation": "من هر صبح آب می‌نوشم."
+      },
+      {
+        "sentence": "Can I have some water?",
+        "translation": "می‌توانم کمی آب داشته باشم؟"
+      }
+    ]
+  },
+  {
+    "word": "learn",
+    "audio": "audio/learn.mp3",
+    "examples": [
+      {
+        "sentence": "I learn English every day.",
+        "translation": "من هر روز انگلیسی یاد می‌گیرم."
+      },
+      {
+        "sentence": "We learn new words together.",
+        "translation": "ما با هم کلمات جدید یاد می‌گیریم."
+      }
+    ]
+  },
+  {
+    "word": "beautifully",
+    "audio": "audio/beautifully.mp3",
+    "examples": [
+      {
+        "sentence": "She sings beautifully.",
+        "translation": "او زیبا آواز می‌خواند."
+      }
+    ]
+  },
+  {
+    "word": "help",
+    "audio": "audio/help.mp3",
+    "examples": [
+      {
+        "sentence": "Can you help me, please?",
+        "translation": "می‌توانی لطفاً به من کمک کنی؟"
+      },
+      {
+        "sentence": "I need your help.",
+        "translation": "من به کمک تو نیاز دارم."
+      }
+    ]
+  },
+  {
+    "word": "today",
+    "audio": "audio/today.mp3",
+    "examples": [
+      {
+        "sentence": "I am busy today.",
+        "translation": "من امروز سرم شلوغ است."
+      },
+      {
+        "sentence": "Today is a good day.",
+        "translation": "امروز روز خوبی است."
+      }
+    ]
+  }
+]

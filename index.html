@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101a2b">
+<link rel="manifest" href="manifest.json">
+<title>چرخ واژگان</title>
+<style>
+:root{--bg:#0b1220;--panel:#131f32;--panel2:#192840;--text:#f4f7ff;--muted:#9eacc2;--accent:#70d6b2;--line:#2a3a53}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);font-family:Tahoma,"Segoe UI",sans-serif;overflow:hidden}
+body{padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom)}
+.app{height:100%;max-width:760px;margin:auto;display:flex;flex-direction:column;gap:10px;padding:10px 0}
+header{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 5px}
+header h1{font-size:18px;margin:0;font-weight:800}
+#status{font-size:11px;color:var(--muted)}
+.main{direction:ltr;display:grid;grid-template-columns:minmax(0,1fr) 42%;gap:9px;flex:1;min-height:0}
+.practice{direction:rtl;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px 12px;display:flex;flex-direction:column;min-width:0;overflow:auto}
+.practice .hint{font-size:11px;color:var(--muted);margin-bottom:12px}
+.word-head{font-size:clamp(19px,5vw,27px);font-weight:800;direction:ltr;text-align:center;word-break:break-word;margin:4px 0 12px;color:var(--accent)}
+.action{border:0;border-radius:13px;background:var(--panel2);color:var(--text);padding:12px 10px;font:inherit;font-size:13px;font-weight:700;width:100%;cursor:pointer;touch-action:manipulation}
+.action:active{transform:scale(.98)}
+.sentence-card{margin-top:12px;border:1px solid var(--line);border-radius:15px;padding:12px;background:#101a2b}
+.sentence{font-size:15px;line-height:1.8;direction:ltr;text-align:left;min-height:76px;display:flex;align-items:center;justify-content:center}
+.translation{font-size:13px;color:#c9d5e6;line-height:1.8;border-top:1px solid var(--line);margin-top:8px;padding-top:8px}
+.hidden{display:none}
+.sentence-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+.sentence-actions .action{font-size:11px;padding:11px 5px}
+.wheel-wrap{direction:rtl;position:relative;border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,#111d30,#0e1727);overflow:hidden;min-width:0}
+.wheel-title{text-align:center;color:var(--muted);font-size:11px;padding:12px 3px 3px}
+.wheel{height:calc(100% - 32px);overflow-y:auto;overscroll-behavior:contain;scroll-snap-type:y mandatory;scrollbar-width:none;padding:calc((100% - 150px)/2) 3px;direction:ltr}
+.wheel::-webkit-scrollbar{display:none}
+.wheel-item{height:58px;width:100%;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;border:0;background:transparent;color:#91a0b8;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.5;transform:scale(.78);transition:transform .13s,opacity .13s,color .13s;direction:ltr;cursor:pointer;padding:0 4px;touch-action:pan-y}
+.wheel-item.active{color:#fff;opacity:1;transform:scale(1.16);font-size:17px;font-weight:900}
+.wheel-item.near{opacity:.75;transform:scale(.94)}
+.focus-line{position:absolute;left:5px;right:5px;top:50%;height:58px;transform:translateY(-50%);border-top:1px solid #70d6b277;border-bottom:1px solid #70d6b277;pointer-events:none;border-radius:10px}
+footer{font-size:10px;color:var(--muted);text-align:center;padding:1px}
+@media(min-width:600px){.main{grid-template-columns:minmax(0,1fr) 240px}.practice{padding:22px}.wheel-item{height:64px}.focus-line{height:64px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><h1>چرخ واژگان</h1><span id="status">در حال آماده‌سازی…</span></header>
+<div class="main">
+<section class="practice">
+<div class="hint">برای شنیدن تلفظ، کلمه را از چرخ سمت راست انتخاب کن.</div>
+<div class="word-head" id="selectedWord">Hello</div>
+<button class="action" id="playWord">▶ پخش تلفظ کلمه</button>
+<div class="sentence-card">
+<div class="hint">جمله‌سازی — برای جمله جدید دوباره بزن</div>
+<div class="sentence" id="sentence">Tap the sentence button to make an example.</div>
+<div class="translation hidden" id="translation"></div>
+<div class="sentence-actions">
+<button class="action" id="newSentence">جمله جدید</button>
+<button class="action" id="toggleTranslation">نمایش ترجمه</button>
+</div>
+</div>
+</section>
+<aside class="wheel-wrap">
+<div class="wheel-title">فهرست واژه‌ها</div>
+<div class="wheel" id="wheel" aria-label="چرخ واژگان"></div>
+<div class="focus-line"></div>
+</aside>
+</div>
+<footer>برای ذخیره تلفظ‌ها، هر کلمه را حداقل یک‌بار در حالت آنلاین پخش کن.</footer>
+</div>
+<audio id="audio" preload="none"></audio>
+<script>
+const wheel=document.getElementById('wheel'), wordTitle=document.getElementById('selectedWord');
+const sentenceBox=document.getElementById('sentence'), translationBox=document.getElementById('translation');
+const statusEl=document.getElementById('status'), audio=document.getElementById('audio');
+let words=[], selected=0, exampleIndex={}, scrollFrame=0, suppressScroll=false;
+
+async function loadWords(){
+  try{
+    const res=await fetch('./words.json',{cache:'no-store'});
+    if(!res.ok) throw new Error('words.json not found');
+    const data=await res.json();
+    words=Array.isArray(data)?data:(data.words||[]);
+    words=words.filter(x=>x && x.word);
+    if(!words.length) throw new Error('No words in JSON');
+    renderWheel();
+    selectWord(0,false);
+    statusEl.textContent=`${words.length} واژه`;
+  }catch(e){
+    statusEl.textContent='خطا در بارگذاری JSON';
+    sentenceBox.textContent='فایل words.json را کنار index.html قرار بده.';
+    console.error(e);
+  }
+}
+function renderWheel(){
+  wheel.innerHTML='';
+  const copies=5;
+  for(let copy=0;copy<copies;copy++){
+    words.forEach((item,i)=>{
+      const b=document.createElement('button');
+      b.className='wheel-item'; b.type='button'; b.textContent=item.word;
+      b.dataset.index=i; b.addEventListener('click',()=>selectWord(i,true));
+      wheel.appendChild(b);
+    });
+  }
+  const target=words.length*2;
+  requestAnimationFrame(()=>{
+    const el=wheel.children[target];
+    if(el) wheel.scrollTop=el.offsetTop-wheel.offsetTop-wheel.clientHeight/2+el.clientHeight/2;
+    updateWheelScale();
+  });
+}
+function nearestItem(){
+  const center=wheel.scrollTop+wheel.clientHeight/2;
+  let best=null,dist=Infinity;
+  [...wheel.children].forEach(el=>{
+    const d=Math.abs((el.offsetTop+el.offsetHeight/2)-center);
+    if(d<dist){dist=d;best=el;}
+  });
+  return best;
+}
+function updateWheelScale(){
+  const center=wheel.scrollTop+wheel.clientHeight/2;
+  [...wheel.children].forEach(el=>{
+    const d=Math.abs((el.offsetTop+el.offsetHeight/2)-center);
+    el.classList.toggle('active',d<30);
+    el.classList.toggle('near',d>=30&&d<90);
+  });
+}
+function selectWord(index,play=true){
+  selected=(index+words.length)%words.length;
+  wordTitle.textContent=words[selected].word;
+  translationBox.classList.add('hidden'); translationBox.textContent='';
+  document.getElementById('toggleTranslation').textContent='نمایش ترجمه';
+  showNewSentence();
+  const candidates=[...wheel.children].filter(el=>Number(el.dataset.index)===selected);
+  const center=wheel.scrollTop+wheel.clientHeight/2;
+  let target=candidates.sort((a,b)=>Math.abs(a.offsetTop+a.offsetHeight/2-center)-Math.abs(b.offsetTop+b.offsetHeight/2-center))[0];
+  if(target){
+    suppressScroll=true;
+    wheel.scrollTo({top:target.offsetTop-wheel.offsetTop-wheel.clientHeight/2+target.clientHeight/2,behavior:'smooth'});
+    setTimeout(()=>{suppressScroll=false;updateWheelScale()},250);
+  }
+  if(play) playPronunciation();
+}
+function current(){return words[selected]||{}}
+function showNewSentence(){
+  const examples=Array.isArray(current().examples)?current().examples:[];
+  if(examples.length){
+    const idx=(exampleIndex[selected]||0)%examples.length;
+    const ex=examples[idx];
+    sentenceBox.textContent=ex.sentence||'';
+    translationBox.textContent=ex.translation||'ترجمه‌ای برای این جمله ثبت نشده است.';
+    exampleIndex[selected]=idx+1;
+  }else{
+    sentenceBox.textContent=`I use the word "${current().word}" in a sentence.`;
+    translationBox.textContent='برای این واژه هنوز جمله و ترجمه‌ای در فایل JSON ثبت نشده است.';
+  }
+  translationBox.classList.add('hidden');
+  document.getElementById('toggleTranslation').textContent='نمایش ترجمه';
+}
+function playPronunciation(){
+  const item=current();
+  if(item.audio){
+    audio.pause(); audio.src=item.audio; audio.currentTime=0;
+    audio.play().catch(()=>speakFallback(item.word));
+  }else speakFallback(item.word);
+}
+function speakFallback(word){
+  if(!('speechSynthesis' in window)){statusEl.textContent='فایل صوتی این واژه موجود نیست';return;}
+  const u=new SpeechSynthesisUtterance(word);u.lang='en-US';u.rate=.85;
+  speechSynthesis.cancel();speechSynthesis.speak(u);
+  statusEl.textContent='تلفظ با صدای دستگاه (برای آفلاین تضمین‌شده نیست)';
+}
+wheel.addEventListener('scroll',()=>{
+  if(scrollFrame) cancelAnimationFrame(scrollFrame);
+  scrollFrame=requestAnimationFrame(()=>{
+    updateWheelScale();
+    const el=nearestItem();
+    if(el && !suppressScroll){
+      const i=Number(el.dataset.index);
+      if(i!==selected){
+        selected=i;wordTitle.textContent=current().word;
+        showNewSentence();
+        translationBox.classList.add('hidden');
+      }
+    }
+  });
+},{passive:true});
+document.getElementById('playWord').addEventListener('click',playPronunciation);
+document.getElementById('newSentence').addEventListener('click',showNewSentence);
+document.getElementById('toggleTranslation').addEventListener('click',()=>{
+  translationBox.classList.toggle('hidden');
+  document.getElementById('toggleTranslation').textContent=translationBox.classList.contains('hidden')?'نمایش ترجمه':'بستن ترجمه';
+});
+if('serviceWorker' in navigator && location.protocol!=='file:'){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').then(()=>statusEl.textContent='آماده · قابلیت آفلاین فعال').catch(()=>statusEl.textContent='آماده'));
+}
+loadWords();
+</script>
+</body>
+</html>
