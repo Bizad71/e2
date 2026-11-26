@@ -1,4 +1,4 @@
-const CACHE_NAME='word-wheel-v1';
+const CACHE_NAME='word-wheel-v2';
 const CORE=['./','./index.html','./words.json','./manifest.json'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(CORE))));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k))))));
